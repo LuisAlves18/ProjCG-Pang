@@ -23,8 +23,8 @@ let width = sheetWidth / cols
 let height = sheetHeight / rows
 let currFrame = 0
 let rightKey = leftKey = false
-let gravity = 0.5
-let bounce = 0.7
+let gravity = 1
+let bounce = 0
 
 
 let image = {
@@ -45,6 +45,7 @@ let image = {
         }
     }
 }
+
 
 class Ball {
     constructor(x, y, r, c, v, d) { // CONSTRUCTOR
@@ -71,23 +72,25 @@ class Ball {
         if (this.x < this.R || this.x > canvasWidth - this.R)
             this.dX = -this.dX;
         // check Canvas horizontal collisions
-        if (this.y < this.R || this.y > canvasHeight - this.R) {
+        if (this.y < this.R || this.y > 530 - this.R) {
             this.dY = -this.dY;
-            this.dY -= -bounce
+        } else {
+            this.dY += gravity
         }
+
+
+
         this.x += this.dX; // update horizontal position 
         this.y += this.dY; // update vertical position 
-        this.dY += gravity
+
 
     }
 }
 let b = new Array(); // setup as many balls as wanted
 
-let R = Math.floor(Math.random() * 256);
-let G = Math.floor(Math.random() * 256);
-let B = Math.floor(Math.random() * 256);
-let color = `rgb(${R},${G},${B})`; // random color
-let r = 100;
+
+let color = `rgb(213,196,161)`; //ball color
+let r = 85;
 
 // random position (inside Canvas)
 let xInit = canvasWidth / 2;
@@ -114,14 +117,12 @@ image.level.one.layer.four.src = "./img/background/1/postapocalypse1.png"
 image.level.one.layer.five.src = "./img/background/1/fence.png"
 image.level.one.layer.six.src = "./img/background/1/road.png"
 
-//position where frame will be drawn
-
 
 
 
 
 function render() {
-    context.clearRect(0, 0, canvasWidth, canvasHeight)
+    //context.clearRect(0, 0, canvasWidth, canvasHeight)
     for (let i in image.level.one.layer) {
         context.drawImage(image.level.one.layer[i], 0, 0, canvasWidth, canvasHeight)
     }
@@ -130,9 +131,7 @@ function render() {
 
     context.drawImage(spriteImage, srcX, srcY, width, height, characterX, characterY, 150, 150)
 
-    // fade Canvas
-    context.fillStyle = "rgba(255,255,255,0.25)"
-    context.fillRect(0, 0, canvasWidth, canvasHeight);
+
 
     // draw & update
     b.forEach(function(ball) {
@@ -151,8 +150,8 @@ function ArrowPressed(e) {
     if (e.key == 'ArrowRight') {
         rightKey = true
         srcY = 128
-        if (characterX <= canvasWidth) {
-            characterX += 7
+        if (characterX + 130 < canvas.width) {
+            characterX += 10
         }
 
 
@@ -160,7 +159,10 @@ function ArrowPressed(e) {
     if (e.key == 'ArrowLeft') {
         leftKey = true
         srcY = 192
-        characterX -= 7
+        if (characterX - 130 > -150) {
+            characterX -= 10
+        }
+
     }
 }
 
