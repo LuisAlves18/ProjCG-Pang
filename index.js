@@ -22,9 +22,13 @@ let characterY = 400
 let width = sheetWidth / cols
 let height = sheetHeight / rows
 let currFrame = 0
-let rightKey = leftKey = false
+let rightKey = leftKey = upKey = false
+
 let gravity = 1
-let bounce = 0
+
+let harpoonY = characterY
+let harpoonX = characterX
+
 
 
 let image = {
@@ -69,6 +73,9 @@ class Ball {
 
     }
     update() {
+
+        this.x += this.dX; // update horizontal position 
+        this.y += this.dY; // update vertical position 
         if (this.x < this.R || this.x > canvasWidth - this.R)
             this.dX = -this.dX;
         // check Canvas horizontal collisions
@@ -77,12 +84,31 @@ class Ball {
         } else {
             this.dY += gravity
         }
+        /*     if (harpoonX + 50 < this.x
+                //totally to the left: no collision
+                ||
+                harpoonX > (this.x + this.r * 2)
+                //totally to the right: no collision
+                ||
+                harpoonY + 50 < this.y
+                //totally above: no collision
+                ||
+                harpoonY > (this.y + this.r * 2)) {
+                //totally below: no collision
+            } else {
+                console.log("amsognaosgm")
+                upKey = false
 
-
-
-        this.x += this.dX; // update horizontal position 
-        this.y += this.dY; // update vertical position 
-
+                harpoonX = characterX
+                harpoonY = characterY
+            } */
+        /*         if (harpoonX + 50 >= this.x && harpoonX + 50 <= (this.x + this.R) && harpoonY >= this.y && harpoonY <= (this.y + this.R)) {
+                    console.log("amsognaosgm")
+                    upKey = false
+                    harpoonY = 0
+                    harpoonX = characterX
+                    harpoonY = characterY
+                } */
 
     }
 }
@@ -103,7 +129,6 @@ let direction = Math.random() * 2 * Math.PI
 b.push(new Ball(xInit, yInit, r, color, velocity, direction))
 
 
-// let rightKey = leftKey = false
 let spriteImage = new Image()
 spriteImage.src = "./img/players/imagem1.png"
 
@@ -122,22 +147,46 @@ image.level.one.layer.six.src = "./img/background/1/road.png"
 
 
 function render() {
-    //context.clearRect(0, 0, canvasWidth, canvasHeight)
-    for (let i in image.level.one.layer) {
-        context.drawImage(image.level.one.layer[i], 0, 0, canvasWidth, canvasHeight)
-    }
-    currFrame = ++currFrame % cols
-    srcX = currFrame * width
+    drawImage()
 
-    context.drawImage(spriteImage, srcX, srcY, width, height, characterX, characterY, 150, 150)
-
-
-
-    // draw & update
+    // draw & update ball
     b.forEach(function(ball) {
         ball.draw();
         ball.update();
     });
+    //update background
+    function updateFrame() {
+        context.clearRect(0, 0, canvasWidth, canvasHeight)
+        for (let i in image.level.one.layer) {
+            context.drawImage(image.level.one.layer[i], 0, 0, canvasWidth, canvasHeight)
+        }
+        currFrame = ++currFrame % cols
+        srcX = currFrame * width
+
+    }
+    //update player 
+    function drawImage() {
+        updateFrame()
+        context.drawImage(spriteImage, srcX, srcY, width, height, characterX, characterY, 150, 150)
+    }
+
+
+    if (upKey && harpoonY > -1) {
+        context.beginPath()
+        context.fillStyle = "blue"
+        context.fillRect(harpoonX, harpoonY, 50, 50)
+        harpoonY = harpoonY - 10
+
+
+
+    }
+    if (harpoonY == 0) {
+        upKey = false
+        harpoonX = characterX
+        harpoonY = characterY
+    }
+    //collisions
+
 
     //new frame
     window.requestAnimationFrame(render);
@@ -146,15 +195,22 @@ render(); //start the animation
 
 
 
+
 function ArrowPressed(e) {
+    if (e.key == 'ArrowUp' && upKey == false) {
+        upKey = true
+        harpoonX = characterX
+        harpoonY = characterY
+
+
+    }
+
     if (e.key == 'ArrowRight') {
         rightKey = true
         srcY = 128
         if (characterX + 130 < canvas.width) {
             characterX += 10
         }
-
-
     }
     if (e.key == 'ArrowLeft') {
         leftKey = true
@@ -165,6 +221,7 @@ function ArrowPressed(e) {
 
     }
 }
+
 
 function ArrowReleased(e) {
     if (e.key == 'ArrowRight') {
