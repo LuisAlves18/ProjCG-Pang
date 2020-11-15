@@ -52,7 +52,7 @@ let image = {
 
 
 class Ball {
-    constructor(x, y, r, c, v, d) { // CONSTRUCTOR
+    constructor(x, y, r, c, v, d, squareX, squareY, squareH) { // CONSTRUCTOR
         this.x = x; // initial X position
         this.y = y; // initial Y position
         // (constant) horizontal displacement (velocity): d is a direction angle
@@ -62,12 +62,18 @@ class Ball {
         this.c = c; // color
         this.R = r; // circle radius (constant)
         this.v = v
+        this.squareX = this.x - this.R
+        this.squareY = this.y - this.R
+        this.squareH = this.R * 2
 
     }
 
     draw() {
         context.fillStyle = this.c;
         context.beginPath();
+        context.fillStyle = 'rgba(225,225,225)'
+
+        //context.clearRect(this.squareX, this.squareY, this.squareH, this.squareH)
         context.arc(this.x, this.y, this.R, 0, 2 * Math.PI);
         context.fill();
 
@@ -76,6 +82,9 @@ class Ball {
 
         this.x += this.dX; // update horizontal position 
         this.y += this.dY; // update vertical position 
+        this.squareX = this.x - this.R
+        this.squareY = this.y - this.R
+
         if (this.x < this.R || this.x > canvasWidth - this.R)
             this.dX = -this.dX;
         // check Canvas horizontal collisions
@@ -84,32 +93,27 @@ class Ball {
         } else {
             this.dY += gravity
         }
-        /*     if (harpoonX + 50 < this.x
-                //totally to the left: no collision
-                ||
-                harpoonX > (this.x + this.r * 2)
-                //totally to the right: no collision
-                ||
-                harpoonY + 50 < this.y
-                //totally above: no collision
-                ||
-                harpoonY > (this.y + this.r * 2)) {
-                //totally below: no collision
-            } else {
-                console.log("amsognaosgm")
-                upKey = false
+        if (harpoonX + 50 < this.squareX
+            //totally to the left: no collision
+            ||
+            harpoonX > (this.squareX + this.squareH)
+            //totally to the right: no collision
+            ||
+            harpoonY + 50 < this.squareY
+            //totally above: no collision
+            ||
+            harpoonY > (this.squareY + this.squareH)) {
+            //totally below: no collision
+            //colidiu = true;
+        } else {
+            console.log("amsognaosgm")
+            upKey = false
 
-                harpoonX = characterX
-                harpoonY = characterY
-            } */
-        /*         if (harpoonX + 50 >= this.x && harpoonX + 50 <= (this.x + this.R) && harpoonY >= this.y && harpoonY <= (this.y + this.R)) {
-                    console.log("amsognaosgm")
-                    upKey = false
-                    harpoonY = 0
-                    harpoonX = characterX
-                    harpoonY = characterY
-                } */
 
+
+            harpoonX = characterX
+            harpoonY = characterY
+        }
     }
 }
 let b = new Array(); // setup as many balls as wanted
@@ -143,8 +147,24 @@ image.level.one.layer.five.src = "./img/background/1/fence.png"
 image.level.one.layer.six.src = "./img/background/1/road.png"
 
 
+let count = 0;
+
+function drawImage() {
+    context.clearRect(0, 0, canvasWidth, canvasHeight)
+    for (let i in image.level.one.layer) {
+        context.drawImage(image.level.one.layer[i], 0, 0, canvasWidth, canvasHeight)
+    }
+
+    count++
+    if (count % 5 == 0) {
+        currFrame = ++currFrame % cols
+        srcX = currFrame * width
+        count = 0;
+    }
 
 
+    context.drawImage(spriteImage, srcX, srcY, width, height, characterX, characterY, 150, 150)
+}
 
 function render() {
     drawImage()
@@ -154,21 +174,12 @@ function render() {
         ball.draw();
         ball.update();
     });
-    //update background
-    function updateFrame() {
-        context.clearRect(0, 0, canvasWidth, canvasHeight)
-        for (let i in image.level.one.layer) {
-            context.drawImage(image.level.one.layer[i], 0, 0, canvasWidth, canvasHeight)
-        }
-        currFrame = ++currFrame % cols
-        srcX = currFrame * width
 
-    }
+
+    //update background
+
     //update player 
-    function drawImage() {
-        updateFrame()
-        context.drawImage(spriteImage, srcX, srcY, width, height, characterX, characterY, 150, 150)
-    }
+
 
 
     if (upKey && harpoonY > -1) {
