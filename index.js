@@ -1,37 +1,26 @@
-canvas = document.getElementById("myCanvas")
-context = canvas.getContext("2d")
-canvas.height = 620
-canvas.width = 1280
-canvasWidth = canvas.width
-canvasHeight = canvas.height
-
-let x = 0
-let y = 0
-
-let srcX
-let srcY = 0
-
-let sheetWidth = 320
-let sheetHeight = 576
-
-let cols = 5
-let rows = 9
-let characterX = canvasWidth / 2
-let characterY = 400
-
-let width = sheetWidth / cols
-let height = sheetHeight / rows
+let players = []
+let upKey = leftKey = rightKey = false
 let currFrame = 0
-let rightKey = leftKey = upKey = false
+let gravity = 0.5
 
-let gravity = 1
+window.onload = () => {
+    canvas = document.getElementById("myCanvas")
+    ctx = canvas.getContext("2d")
+    canvas.height = 620
+    canvas.width = 1280
+    players.push(new Player(600, 400))
+    render()
+}
 
-let harpoonY = characterY
-let harpoonX = characterX
+const canvasWidth = 620
+const canvasHeight = 1280
 
 
 
 let image = {
+    player: {
+        one: new Image(),
+    },
     level: {
         one: {
             sky: {
@@ -51,94 +40,7 @@ let image = {
 }
 
 
-class Ball {
-    constructor(x, y, r, c, v, d, squareX, squareY, squareH) { // CONSTRUCTOR
-        this.x = x; // initial X position
-        this.y = y; // initial Y position
-        // (constant) horizontal displacement (velocity): d is a direction angle
-        this.dX = 2 * Math.cos(d);
-        // (constant) vertical displacement (velocity): d is a direction angle
-        this.dY = 2 * Math.sin(d);
-        this.c = c; // color
-        this.R = r; // circle radius (constant)
-        this.v = v
-        this.squareX = this.x - this.R
-        this.squareY = this.y - this.R
-        this.squareH = this.R * 2
-
-    }
-
-    draw() {
-        context.fillStyle = this.c;
-        context.beginPath();
-        context.fillStyle = 'rgba(225,225,225)'
-
-        //context.clearRect(this.squareX, this.squareY, this.squareH, this.squareH)
-        context.arc(this.x, this.y, this.R, 0, 2 * Math.PI);
-        context.fill();
-
-    }
-    update() {
-
-        this.x += this.dX; // update horizontal position 
-        this.y += this.dY; // update vertical position 
-        this.squareX = this.x - this.R
-        this.squareY = this.y - this.R
-
-        if (this.x < this.R || this.x > canvasWidth - this.R)
-            this.dX = -this.dX;
-        // check Canvas horizontal collisions
-        if (this.y < this.R || this.y > 530 - this.R) {
-            this.dY = -this.dY;
-        } else {
-            this.dY += gravity
-        }
-        if (harpoonX + 50 < this.squareX
-            //totally to the left: no collision
-            ||
-            harpoonX > (this.squareX + this.squareH)
-            //totally to the right: no collision
-            ||
-            harpoonY + 50 < this.squareY
-            //totally above: no collision
-            ||
-            harpoonY > (this.squareY + this.squareH)) {
-            //totally below: no collision
-            //colidiu = true;
-        } else {
-            console.log("amsognaosgm")
-            upKey = false
-
-
-
-            harpoonX = characterX
-            harpoonY = characterY
-        }
-    }
-}
-let b = new Array(); // setup as many balls as wanted
-
-
-let color = `rgb(213,196,161)`; //ball color
-let r = 85;
-
-// random position (inside Canvas)
-let xInit = canvasWidth / 2;
-let yInit = canvasHeight / 4;
-
-//random velocity
-let velocity = 4;
-let direction = Math.random() * 2 * Math.PI
-
-b.push(new Ball(xInit, yInit, r, color, velocity, direction))
-
-
-let spriteImage = new Image()
-spriteImage.src = "./img/players/imagem1.png"
-
-//level 1
-// image.level.one.sky.src = "./img/Background/PNG/Battleground1/sky.png"
-
+//Images from background
 image.level.one.layer.one.src = "./img/background/1/ground&houses_bg.png"
 image.level.one.layer.two.src = "./img/background/1/ground&houses_bg.png"
 image.level.one.layer.three.src = "./img/background/1/ground&houses2.png"
@@ -146,104 +48,281 @@ image.level.one.layer.four.src = "./img/background/1/postapocalypse1.png"
 image.level.one.layer.five.src = "./img/background/1/fence.png"
 image.level.one.layer.six.src = "./img/background/1/road.png"
 
+//player1
+image.player.one.src = "./img/players/imagem1.png"
 
-let count = 0;
 
-function drawImage() {
-    context.clearRect(0, 0, canvasWidth, canvasHeight)
-    for (let i in image.level.one.layer) {
-        context.drawImage(image.level.one.layer[i], 0, 0, canvasWidth, canvasHeight)
+
+
+
+
+class Ball {
+    constructor(x, y, radius, color, v, d, squareX, squareY, squareH) { // CONSTRUCTOR
+        this.x = x; // initial X position
+        this.y = y; // initial Y position
+        // (constant) horizontal displacement (velocity): d is a direction angle
+        this.dX = 5 * Math.cos(d);
+        // (constant) vertical displacement (velocity): d is a direction angle
+        this.dY = 5 * Math.sin(d);
+        this.color = color; // color
+        this.R = radius
+        this.v = v
+        this.squareX = this.x - this.R
+        this.squareY = this.y - this.R
+        this.squareH = this.R * 2
+    }
+    draw() {
+        ctx.fillStyle = `rgb(213,196,161)`;
+        /* this.x = canvas.width / 2
+        this.y = canvas.height / 4 */
+
+
+        switch (this.R) {
+            case 100:
+                ctx.fillStyle = this.color;
+                ctx.beginPath()
+                ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI);
+                ctx.fill();
+                break;
+            case 80:
+                this.color = "purple"
+                ctx.fillStyle = this.color;
+                ctx.beginPath()
+                ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI);
+                ctx.fill();
+                break;
+            case 40:
+                this.color = "blue"
+                ctx.fillStyle = this.color;
+                ctx.beginPath()
+                ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI);
+                ctx.fill();
+                break;
+            case 20:
+                this.color = "red"
+                ctx.fillStyle = this.color;
+                ctx.beginPath()
+                ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI);
+                ctx.fill();
+                break;
+        }
+    }
+    updateBall() {
+
+        this.x += this.dX; // update horizontal position 
+        this.y += this.dY; // update vertical position 
+        this.squareX = this.x - this.R
+        this.squareY = this.y - this.R
+
+
+
+        if (this.x < this.R || this.x > canvas.width - this.R)
+            this.dX = -this.dX;
+        // check Canvas horizontal collisions
+        if (this.y < this.R || this.y > 530 - this.R) {
+            this.dY = -this.dY;
+        } else {
+            this.dY += gravity
+        }
+        if (harpoon.x + 50 < this.squareX
+            //totally to the left: no collision
+            ||
+            harpoon.x > (this.squareX + this.squareH)
+            //totally to the right: no collision
+            ||
+            harpoon.y + 50 < this.squareY
+            //totally above: no collision
+            ||
+            harpoon.y > (this.squareY + this.squareH)) {
+            //totally below: no collision
+            //colidiu = true;
+        } else {
+            console.log("colidiu");
+            upKey = false
+            harpoon.x = players[0].x
+            harpoon.y = players[0].y
+        }
+
+    }
+}
+let b = new Array(); // setup as many balls as wanted
+let color = `rgb(213,196,161)`; //ball color
+let radius = 100;
+
+// random position (inside Canvas)
+
+
+//random velocity
+let v = 4;
+let d = Math.random() * 2 * Math.PI
+b.push(new Ball(600, 100, 100, color, v, d))
+
+
+class Player {
+    constructor(x, y) {
+        this.x = x
+        this.y = y
+        this.spriteSheet = {
+            img: image.player.one,
+            frameSize: {
+                x: 64,
+                y: 64
+            },
+            frameAmount: 5
+
+        }
+        this.frameSize = {
+            x: 150,
+            y: 150
+        }
+
+        this.initialSpeed = 10
+        this.xSpeed = 0
+
+        this.frame = 0
+        this.currAnimation = "idleRight"
     }
 
-    count++
-    if (count % 5 == 0) {
-        currFrame = ++currFrame % cols
-        srcX = currFrame * width
-        count = 0;
+    draw() {
+        switch (this.currAnimation) {
+            case "idleRight":
+                this.xSpeed = 0
+                ctx.drawImage(this.spriteSheet.img, this.frame * this.spriteSheet.frameSize.x, 0, this.spriteSheet.frameSize.x, this.spriteSheet.frameSize.y, this.x, this.y, this.frameSize.x, this.frameSize.y)
+                break
+            case "idleLeft":
+                this.xSpeed = 0
+                ctx.drawImage(this.spriteSheet.img, this.frame * this.spriteSheet.frameSize.x, this.spriteSheet.frameSize.y, this.spriteSheet.frameSize.x, this.spriteSheet.frameSize.y, this.x, this.y, this.frameSize.x, this.frameSize.y)
+                break
+            case "walkRight":
+                this.xSpeed = this.initialSpeed
+                ctx.drawImage(this.spriteSheet.img, this.frame * this.spriteSheet.frameSize.x, this.spriteSheet.frameSize.y * 2, this.spriteSheet.frameSize.x, this.spriteSheet.frameSize.y, this.x, this.y, this.frameSize.x, this.frameSize.y)
+                break
+            case "walkLeft":
+                this.xSpeed = -this.initialSpeed
+                ctx.drawImage(this.spriteSheet.img, this.frame * this.spriteSheet.frameSize.x, this.spriteSheet.frameSize.y * 3, this.spriteSheet.frameSize.x, this.spriteSheet.frameSize.y, this.x, this.y, this.frameSize.x, this.frameSize.y)
+                break
+        }
+        if (currFrame % 3 == 0) {
+            this.frame = this.frame < 4 ? this.frame + 1 : 0
+        }
+
     }
 
 
-    context.drawImage(spriteImage, srcX, srcY, width, height, characterX, characterY, 150, 150)
 }
 
-function render() {
-    drawImage()
+class Harpoon {
+    constructor(x, y, w, h) {
+        this.x = x
+        this.y = y
+        this.w = w
+        this.h = h
+    }
+    draw() {
+        /* ctx.beginPath()
+        ctx.fillRect(X, Y, this.w, this.h) */
+        ctx.fillRect(this.x, this.y, this.w, this.h)
+    }
+    update(X, Y) {
 
-    // draw & update ball
-    b.forEach(function(ball) {
-        ball.draw();
-        ball.update();
-    });
-
-
-    //update background
-
-    //update player 
-
-
-
-    if (upKey && harpoonY > -1) {
-        context.beginPath()
-        context.fillStyle = "blue"
-        context.fillRect(harpoonX, harpoonY, 50, 50)
-        harpoonY = harpoonY - 10
-
-
+        /* let X = this.x
+        this.y -= 10
+        ctx.fillRect(X, this.y, this.w, this.h) */
+        this.x = X
+        this.y = Y
 
     }
-    if (harpoonY == 0) {
-        upKey = false
-        harpoonX = characterX
-        harpoonY = characterY
-    }
-    //collisions
-
-
-    //new frame
-    window.requestAnimationFrame(render);
 }
-render(); //start the animation
+let harpoon = new Harpoon(-10000, -10000, 50, 50)
+
 
 
 
 
 function ArrowPressed(e) {
-    if (e.key == 'ArrowUp' && upKey == false) {
-        upKey = true
-        harpoonX = characterX
-        harpoonY = characterY
-
-
-    }
-
-    if (e.key == 'ArrowRight') {
+    if (e.keyCode == 39) {
         rightKey = true
-        srcY = 128
-        if (characterX + 130 < canvas.width) {
-            characterX += 10
-        }
     }
-    if (e.key == 'ArrowLeft') {
+    if (e.keyCode == 37) {
         leftKey = true
-        srcY = 192
-        if (characterX - 130 > -150) {
-            characterX -= 10
-        }
-
     }
-}
+    if (e.keyCode == 38 && upKey == false) {
+        upKey = true
+        harpoon.x = players[0].x
+        harpoon.y = players[0].y
+    }
 
+    e.preventDefault()
+}
 
 function ArrowReleased(e) {
-    if (e.key == 'ArrowRight') {
+    if (e.keyCode == 39) {
         rightKey = false
-        srcY = 0
     }
-    if (e.key == 'ArrowLeft') {
+    if (e.keyCode == 37) {
         leftKey = false
-        srcY = 64
+    }
+
+
+}
+
+function render() {
+
+
+
+    //Draw Background
+    for (let i in image.level.one.layer) {
+        ctx.drawImage(image.level.one.layer[i], 0, 0, canvas.width, canvas.height)
+    }
+
+
+    //Draw Player
+    players.forEach(player => {
+        player.draw()
+    })
+
+    //draw ball
+
+    b.forEach(function(ball) {
+        ball.draw();
+        ball.updateBall();
+    });
+
+
+
+
+    if (currFrame <= 60) {
+        currFrame++
+    } else {
+        currFrame = 0
+    }
+
+    if (rightKey && (players[0].x + 125 < canvas.width)) {
+        players[0].currAnimation = "walkRight"
+        players[0].x += players[0].xSpeed
 
     }
+    if (leftKey && (players[0].x - 125 > -145)) {
+        players[0].currAnimation = "walkLeft"
+        players[0].x += players[0].xSpeed
+    }
+    if (upKey && harpoon.y > -1) {
+
+        harpoon.draw(harpoon.x + 100, harpoon.y)
+            //harpoon.update(players[0].x, players[0].y)
+        harpoon.y -= 10
+
+
+    }
+    if (harpoon.y == 0) {
+        upKey = false
+        harpoon.x = players[0].x
+        harpoon.y = players[0].y
+    }
+
+    window.requestAnimationFrame(render)
 }
+
+
 window.addEventListener('keydown', ArrowPressed)
 window.addEventListener('keyup', ArrowReleased)

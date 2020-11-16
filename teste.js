@@ -57,25 +57,35 @@ image.player.one.src = "./img/players/imagem1.png"
 
 
 class Ball {
-    constructor(x, y, radius, color, v, d, squareX, squareY, squareH) { // CONSTRUCTOR
-        this.x = x; // initial X position
-        this.y = y; // initial Y position
-        // (constant) horizontal displacement (velocity): d is a direction angle
-        this.dX = 2 * Math.cos(d);
-        // (constant) vertical displacement (velocity): d is a direction angle
-        this.dY = 2 * Math.sin(d);
-        this.color = color; // color
-        this.R = radius
-        this.v = v
-        this.squareX = this.x - this.R
-        this.squareY = this.y - this.R
-        this.squareH = this.R * 2
+    // constructor(x, y, radius, color, v, d, squareX, squareY, squareH) { // CONSTRUCTOR
+    //     this.x = x; // initial X position
+    //     this.y = y; // initial Y position
+    //     // (constant) horizontal displacement (velocity): d is a direction angle
+    //     this.dX = 2 * Math.cos(d);
+    //     // (constant) vertical displacement (velocity): d is a direction angle
+    //     this.dY = 2 * Math.sin(d);
+    //     this.color = color; // color
+    //     this.R = radius
+    //     this.v = v
+    //     this.squareX = this.x - this.R
+    //     this.squareY = this.y - this.R
+    //     this.squareH = this.R * 2
+    // }
+
+
+    constructor(x, y, radius, a, vx) {
+        this.x = x
+        this.y = y
+        this.color = "red"
+        this.radius = radius
+        this.a = a
+        this.v = {
+            x: vx,
+            y: -10
+        }
+        this.active = true
     }
     draw() {
-        ctx.fillStyle = `rgb(213,196,161)`;
-        this.x = canvas.width / 2
-        this.y = canvas.height / 4
-
 
         switch (this.R) {
             case 100:
@@ -107,44 +117,90 @@ class Ball {
                 break;
         }
     }
-    updateBall() {
-
-        this.x += this.dX; // update horizontal position 
-        this.y += this.dY; // update vertical position 
-        this.squareX = this.x - this.R
-        this.squareY = this.y - this.R
-
-
-
-        if (this.x < this.R || this.x > canvas.width - this.R)
-            this.dX = -this.dX;
-        // check Canvas horizontal collisions
-        if (this.y < this.R || this.y > 530 - this.R) {
-            this.dY = -this.dY;
-        } else {
-            this.dY += gravity
-        }
-        if (harpoon.x + 50 < this.squareX
-            //totally to the left: no collision
-            ||
-            harpoon.x > (this.squareX + this.squareH)
-            //totally to the right: no collision
-            ||
-            harpoon.y + 50 < this.squareY
-            //totally above: no collision
-            ||
-            harpoon.y > (this.squareY + this.squareH)) {
-            //totally below: no collision
-            //colidiu = true;
-        } else {
-            console.log("colidiu");
-            upKey = false
-            harpoon.x = players[0].x
-            harpoon.y = players[0].y
-        }
-
+    move() {
+        this.x += this.v.x
+        this.y += this.v.y
     }
 }
+
+
+
+
+
+// draw() {
+//     ctx.fillStyle = `rgb(213,196,161)`;
+//     this.x = canvas.width / 2
+//     this.y = canvas.height / 4
+
+
+//     switch (this.R) {
+//         case 100:
+//             ctx.fillStyle = this.color;
+//             ctx.beginPath()
+//             ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI);
+//             ctx.fill();
+//             break;
+//         case 80:
+//             this.color = "purple"
+//             ctx.fillStyle = this.color;
+//             ctx.beginPath()
+//             ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI);
+//             ctx.fill();
+//             break;
+//         case 40:
+//             this.color = "blue"
+//             ctx.fillStyle = this.color;
+//             ctx.beginPath()
+//             ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI);
+//             ctx.fill();
+//             break;
+//         case 20:
+//             this.color = "red"
+//             ctx.fillStyle = this.color;
+//             ctx.beginPath()
+//             ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI);
+//             ctx.fill();
+//             break;
+//     }
+// }
+// updateBall() {
+
+//     this.x += this.dX; // update horizontal position 
+//     this.y += this.dY; // update vertical position 
+//     this.squareX = this.x - this.R
+//     this.squareY = this.y - this.R
+
+
+
+//     if (this.x < this.R || this.x > canvas.width - this.R)
+//         this.dX = -this.dX;
+//     // check Canvas horizontal collisions
+//     if (this.y < this.R || this.y > 530 - this.R) {
+//         this.dY = -this.dY;
+//     } else {
+//         this.dY += gravity
+//     }
+//     if (harpoon.x + 50 < this.squareX
+//         //totally to the left: no collision
+//         ||
+//         harpoon.x > (this.squareX + this.squareH)
+//         //totally to the right: no collision
+//         ||
+//         harpoon.y + 50 < this.squareY
+//         //totally above: no collision
+//         ||
+//         harpoon.y > (this.squareY + this.squareH)) {
+//         //totally below: no collision
+//         //colidiu = true;
+//     } else {
+//         console.log("colidiu");
+//         upKey = false
+//         harpoon.x = players[0].x
+//         harpoon.y = players[0].y
+//     }
+
+// }
+
 let b = new Array(); // setup as many balls as wanted
 let color = `rgb(213,196,161)`; //ball color
 let radius = 100;
@@ -155,8 +211,8 @@ let yInit = canvasHeight / 4;
 
 //random velocity
 let v = 4;
-let d = Math.random() * 2 * Math.PI
-b.push(new Ball(xInit, yInit, 100, color, v, d))
+let d = Math.random() * 4 * Math.PI
+
 
 
 class Player {
@@ -203,7 +259,10 @@ class Player {
                 ctx.drawImage(this.spriteSheet.img, this.frame * this.spriteSheet.frameSize.x, this.spriteSheet.frameSize.y * 3, this.spriteSheet.frameSize.x, this.spriteSheet.frameSize.y, this.x, this.y, this.frameSize.x, this.frameSize.y)
                 break
         }
-        if (currFrame % 3 == 0) {
+
+
+        //Frames per second (character)
+        if (currFrame % 10 == 0) {
             this.frame = this.frame < 4 ? this.frame + 1 : 0
         }
 
@@ -282,12 +341,9 @@ function render() {
         player.draw()
     })
 
-    //draw ball
 
-    b.forEach(function(ball) {
-        ball.draw();
-        ball.updateBall();
-    });
+
+
 
 
 
@@ -320,6 +376,15 @@ function render() {
         harpoon.x = players[0].x
         harpoon.y = players[0].y
     }
+    for (let i = 0; i < b.Length; i++) {
+        b.push(new Ball(b[i].x + radius, b[i].y, radius, b[i].a, b[i].v.x))
+    }
+
+
+    b.forEach(ball => {
+        ball.draw()
+        ball.move()
+    })
 
     window.requestAnimationFrame(render)
 }
