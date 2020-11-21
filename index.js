@@ -200,19 +200,24 @@ class Harpoon {
         this.y = y
         this.w = w
         this.h = h
+        this.active = true
     }
     draw() {
         /* ctx.beginPath()
         ctx.fillRect(X, Y, this.w, this.h) */
         ctx.fillRect(this.x, this.y, this.w, this.h)
+
     }
     update(X, Y) {
 
         /* let X = this.x
         this.y -= 10
         ctx.fillRect(X, this.y, this.w, this.h) */
-        this.x = X
-        this.y = Y
+
+        if (this.active) {
+            this.x = X
+            this.y = Y
+        }
 
     }
 }
@@ -253,9 +258,6 @@ b.push(ball)
 let colDet = 0
 
 function render() {
-
-
-
     //Draw Background
     for (let i in image.level.one.layer) {
         ctx.drawImage(image.level.one.layer[i], 0, 0, canvas.width, canvas.height)
@@ -269,10 +271,10 @@ function render() {
 
     //draw ball
 
-    /* b.forEach(function(ball) {
-        ball.draw();
-        ball.updateBall();
-    }); */
+    // b.forEach(function(ball) {
+    //     ball.draw();
+    //     ball.updateBall();
+    // })
 
 
 
@@ -306,48 +308,74 @@ function render() {
         harpoon.x = players[0].x
         harpoon.y = players[0].y
     }
-    let colidiu = false
-    for (let i = 0; i < b.length; i++) {
-        let balls = b[i]
 
-        if (harpoon.x + 50 < balls.squareX
+
+    let colidiu = false
+    for (let i = b.length - 1; i >= 0; i--) {
+        let ball = b[i]
+
+        if (harpoon.x + 50 < ball.squareX
             //totally to the left: no collision
             ||
-            harpoon.x > (balls.squareX + balls.squareH)
+            harpoon.x > (ball.squareX + ball.squareH)
             //totally to the right: no collision
             ||
-            harpoon.y + 50 < balls.squareY
+            harpoon.y + 50 < ball.squareY
             //totally above: no collision
             ||
-            harpoon.y > (balls.squareY + balls.squareH)) {
+            harpoon.y > (ball.squareY + ball.squareH)) {
             //totally below: no collision
 
         } else {
             colidiu = true
             console.log("colidiu");
             upKey = false
+            console.log(colDet)
             colDet++
-            harpoon.x = players[0].x
-            harpoon.y = players[0].y
+            harpoon.x = -1000
+            harpoon.y = -1000
+                // harpoon.active = false
+                // harpoon.x = players[0].x
+                // harpoon.y = players[0].y
         }
         switch (colDet) {
             case 1:
-                balls.R = 80
+                // balls.R = 80
                 colidiu = false
-                break;
-            case 2:
-                balls.R = 40
-                colidiu = false
+                harpoon.active = true
+
+                let radius = 80
+                let pos = {
+                    x: ball.x,
+                    y: ball.y
+                }
+                b.splice(i)
+                b.push(new Ball(pos.x - radius / 2, pos.y, radius, color, -1, Math.PI))
+                b.push(new Ball(pos.x + radius / 2, pos.y, radius, color, -1, 0))
+
 
                 break;
-            case 3:
-                balls.R = 20
+            case 2:
+
+
                 colidiu = false
+                harpoon.active = true
+                b.splice(i)
+                b.push(new Ball(540, 100, 40, color, v, d))
+                b.push(new Ball(680, 100, 40, color, v, d))
+                break;
+            case 3:
+
+                colidiu = false
+                harpoon.active = true
+                b.splice(i)
+                b.push(new Ball(540, 100, 20, color, v, d))
+                b.push(new Ball(680, 100, 20, color, v, d))
             default:
                 break;
         }
-        balls.draw()
-        balls.updateBall()
+        ball.draw()
+        ball.updateBall()
     }
 
 
