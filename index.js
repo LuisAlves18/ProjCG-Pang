@@ -124,24 +124,7 @@ class Ball {
         } else {
             this.dY += gravity
         }
-        if (harpoon.x + 50 < this.squareX
-            //totally to the left: no collision
-            ||
-            harpoon.x > (this.squareX + this.squareH)
-            //totally to the right: no collision
-            ||
-            harpoon.y + 50 < this.squareY
-            //totally above: no collision
-            ||
-            harpoon.y > (this.squareY + this.squareH)) {
-            //totally below: no collision
-            //colidiu = true;
-        } else {
-            console.log("colidiu");
-            upKey = false
-            harpoon.x = players[0].x
-            harpoon.y = players[0].y
-        }
+
 
     }
 }
@@ -155,7 +138,7 @@ let radius = 100;
 //random velocity
 let v = 4;
 let d = Math.random() * 2 * Math.PI
-b.push(new Ball(600, 100, 100, color, v, d))
+    //b.push(new Ball(600, 100, radius, color, v, d))
 
 
 class Player {
@@ -265,6 +248,9 @@ function ArrowReleased(e) {
 
 
 }
+let ball = new Ball(600, 100, radius, color, v, d)
+b.push(ball)
+let colDet = 0
 
 function render() {
 
@@ -283,10 +269,10 @@ function render() {
 
     //draw ball
 
-    b.forEach(function(ball) {
+    /* b.forEach(function(ball) {
         ball.draw();
         ball.updateBall();
-    });
+    }); */
 
 
 
@@ -314,11 +300,57 @@ function render() {
 
 
     }
+
     if (harpoon.y == 0) {
         upKey = false
         harpoon.x = players[0].x
         harpoon.y = players[0].y
     }
+    let colidiu = false
+    for (let i = 0; i < b.length; i++) {
+        let balls = b[i]
+
+        if (harpoon.x + 50 < balls.squareX
+            //totally to the left: no collision
+            ||
+            harpoon.x > (balls.squareX + balls.squareH)
+            //totally to the right: no collision
+            ||
+            harpoon.y + 50 < balls.squareY
+            //totally above: no collision
+            ||
+            harpoon.y > (balls.squareY + balls.squareH)) {
+            //totally below: no collision
+
+        } else {
+            colidiu = true
+            console.log("colidiu");
+            upKey = false
+            colDet++
+            harpoon.x = players[0].x
+            harpoon.y = players[0].y
+        }
+        switch (colDet) {
+            case 1:
+                balls.R = 80
+                colidiu = false
+                break;
+            case 2:
+                balls.R = 40
+                colidiu = false
+
+                break;
+            case 3:
+                balls.R = 20
+                colidiu = false
+            default:
+                break;
+        }
+        balls.draw()
+        balls.updateBall()
+    }
+
+
 
     window.requestAnimationFrame(render)
 }
