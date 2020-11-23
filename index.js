@@ -57,7 +57,7 @@ image.player.one.src = "./img/players/imagem1.png"
 
 
 class Ball {
-    constructor(x, y, radius, color, v, d, squareX, squareY, squareH) { // CONSTRUCTOR
+    constructor(x, y, R, color, v, d, squareX, squareY, squareH, collisions) { // CONSTRUCTOR
         this.x = x; // initial X position
         this.y = y; // initial Y position
         // (constant) horizontal displacement (velocity): d is a direction angle
@@ -65,11 +65,12 @@ class Ball {
         // (constant) vertical displacement (velocity): d is a direction angle
         this.dY = 5 * Math.sin(d);
         this.color = color; // color
-        this.R = radius
+        this.R = R
         this.v = v
-        this.squareX = this.x - this.R
-        this.squareY = this.y - this.R
-        this.squareH = this.R * 2
+        this.squareX = squareX
+        this.squareY = squareY
+        this.squareH = squareH
+        this.collisons = collisions
     }
     draw() {
         ctx.fillStyle = `rgb(213,196,161)`;
@@ -81,28 +82,41 @@ class Ball {
             case 100:
                 ctx.fillStyle = this.color;
                 ctx.beginPath()
-                ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI);
+                this.squareX = this.x - this.R
+                this.squareY = this.y - this.R
+                this.squareH = this.R * 2
+                ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI, this.squareX, this.squareY, this.squareH);
                 ctx.fill();
                 break;
             case 80:
                 this.color = "purple"
                 ctx.fillStyle = this.color;
                 ctx.beginPath()
-                ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI);
+                this.squareX = this.x - this.R
+                this.squareY = this.y - this.R
+                this.squareH = this.R * 2
+                ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI, this.squareX, this.squareY, this.squareH);
+
                 ctx.fill();
                 break;
             case 40:
                 this.color = "blue"
                 ctx.fillStyle = this.color;
                 ctx.beginPath()
-                ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI);
+                this.squareX = this.x - this.R
+                this.squareY = this.y - this.R
+                this.squareH = this.R * 2
+                ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI, this.squareX, this.squareY, this.squareH);
                 ctx.fill();
                 break;
             case 20:
                 this.color = "red"
                 ctx.fillStyle = this.color;
                 ctx.beginPath()
-                ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI);
+                this.squareX = this.x - this.R
+                this.squareY = this.y - this.R
+                this.squareH = this.R * 2
+                ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI, this.squareX, this.squareY, this.squareH);
                 ctx.fill();
                 break;
         }
@@ -128,9 +142,9 @@ class Ball {
 
     }
 }
-let b = new Array(); // setup as many balls as wanted
+
 let color = `rgb(213,196,161)`; //ball color
-let radius = 100;
+let R = 100;
 
 // random position (inside Canvas)
 
@@ -138,7 +152,7 @@ let radius = 100;
 //random velocity
 let v = 4;
 let d = Math.random() * 2 * Math.PI
-    //b.push(new Ball(600, 100, radius, color, v, d))
+
 
 
 class Player {
@@ -253,7 +267,8 @@ function ArrowReleased(e) {
 
 
 }
-let ball = new Ball(600, 100, radius, color, v, d)
+let b = new Array(); // setup as many balls as wanted
+let ball = new Ball(600, 100, R, color, v, d)
 b.push(ball)
 let colDet = 0
 
@@ -328,61 +343,60 @@ function render() {
 
         } else {
             colidiu = true
-            console.log("colidiu");
+
             upKey = false
-            console.log(colDet)
+
+
             colDet++
+            console.log(colDet);
+
             harpoon.x = -1000
             harpoon.y = -1000
-                // harpoon.active = false
-                // harpoon.x = players[0].x
-                // harpoon.y = players[0].y
+
         }
         switch (colDet) {
-            case 1:
-                // balls.R = 80
-                colidiu = false
-                harpoon.active = true
-
-                let radius = 80
-                let pos = {
-                    x: ball.x,
-                    y: ball.y
-                }
-                b.splice(i)
-                b.push(new Ball(pos.x - radius / 2, pos.y, radius, color, -1, Math.PI))
-                b.push(new Ball(pos.x + radius / 2, pos.y, radius, color, -1, 0))
-
-
-                break;
             case 2:
-
-
+                //console.log("entrei")
                 colidiu = false
-                harpoon.active = true
-                b.splice(i)
-                b.push(new Ball(540, 100, 40, color, v, d))
-                b.push(new Ball(680, 100, 40, color, v, d))
+                ball.R = 80;
+                let ball1 = new Ball(600, 100, 80, color, 4, d)
+                b.push(ball1)
+
+
+
+
+
+
                 break;
-            case 3:
+            case 4:
+
+                ball.R = 40;
 
                 colidiu = false
-                harpoon.active = true
-                b.splice(i)
-                b.push(new Ball(540, 100, 20, color, v, d))
-                b.push(new Ball(680, 100, 20, color, v, d))
+
+
+                break;
+            case 6:
+                ball.R = 20;
+                colidiu = false
+
             default:
                 break;
         }
-        ball.draw()
-        ball.updateBall()
+
+        ball.draw();
+        ball.updateBall();
+
+
+
+
+
     }
 
 
-
     window.requestAnimationFrame(render)
+
+
 }
-
-
 window.addEventListener('keydown', ArrowPressed)
 window.addEventListener('keyup', ArrowReleased)
