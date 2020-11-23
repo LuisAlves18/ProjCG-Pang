@@ -88,7 +88,7 @@ class Ball {
                 ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI, this.squareX, this.squareY, this.squareH);
                 ctx.fill();
                 break;
-            case 80:
+            case 50:
                 this.color = "purple"
                 ctx.fillStyle = this.color;
                 ctx.beginPath()
@@ -99,7 +99,7 @@ class Ball {
 
                 ctx.fill();
                 break;
-            case 40:
+            case 25:
                 this.color = "blue"
                 ctx.fillStyle = this.color;
                 ctx.beginPath()
@@ -109,7 +109,7 @@ class Ball {
                 ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI, this.squareX, this.squareY, this.squareH);
                 ctx.fill();
                 break;
-            case 20:
+            case 12.5:
                 this.color = "red"
                 ctx.fillStyle = this.color;
                 ctx.beginPath()
@@ -252,6 +252,7 @@ function ArrowPressed(e) {
         upKey = true
         harpoon.x = players[0].x
         harpoon.y = players[0].y
+        harpoon.active = true
     }
 
     e.preventDefault()
@@ -270,7 +271,6 @@ function ArrowReleased(e) {
 let b = new Array(); // setup as many balls as wanted
 let ball = new Ball(600, 100, R, color, v, d)
 b.push(ball)
-let colDet = 0
 
 function render() {
     //Draw Background
@@ -341,48 +341,36 @@ function render() {
             harpoon.y > (ball.squareY + ball.squareH)) {
             //totally below: no collision
 
-        } else {
+        } else if (harpoon.active && upKey) {
             colidiu = true
-
+            harpoon.active = false
             upKey = false
-
-
-            colDet++
-            console.log(colDet);
-
             harpoon.x = -1000
             harpoon.y = -1000
-
         }
-        switch (colDet) {
-            case 2:
-                //console.log("entrei")
-                colidiu = false
-                ball.R = 80;
-                let ball1 = new Ball(600, 100, 80, color, 4, d)
-                b.push(ball1)
 
 
 
+        if (colidiu) {
 
+            colidiu = false
+            if (ball.R > 12.5) {
+                const pos = {
+                    x: ball.x,
+                    y: ball.y
+                }
+                const radius = ball.R / 2
+                b.splice(i, 1)
+                b.push(new Ball(pos.x + radius / 2, pos.y, radius, color, 4, d))
+                b.push(new Ball(pos.x - radius / 2, pos.y, radius, color, 4, d))
 
+            } else {
+                b.splice(i, 1)
 
-                break;
-            case 4:
-
-                ball.R = 40;
-
-                colidiu = false
-
-
-                break;
-            case 6:
-                ball.R = 20;
-                colidiu = false
-
-            default:
-                break;
+            }
+            console.log(b)
         }
+
 
         ball.draw();
         ball.updateBall();
