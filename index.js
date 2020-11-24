@@ -2,6 +2,7 @@ let players = []
 let upKey = leftKey = rightKey = false
 let currFrame = 0
 let gravity = 0.5
+let lives = 3
 
 window.onload = () => {
     canvas = document.getElementById("myCanvas")
@@ -18,6 +19,9 @@ const canvasHeight = 1280
 
 
 let image = {
+    life: {
+        one: new Image()
+    },
     player: {
         one: new Image(),
     },
@@ -38,7 +42,7 @@ let image = {
         }
     }
 }
-
+image.life.one.src = "./img/vida.png"
 
 //Images from background
 image.level.one.layer.one.src = "./img/background/1/ground&houses_bg.png"
@@ -57,13 +61,14 @@ image.player.one.src = "./img/players/imagem1.png"
 
 
 class Ball {
-    constructor(x, y, R, color, v, d, squareX, squareY, squareH, collisions) { // CONSTRUCTOR
+    constructor(x, y, R, color, v, d, dX, dY, squareX, squareY, squareH, collisions) { // CONSTRUCTOR
         this.x = x; // initial X position
         this.y = y; // initial Y position
         // (constant) horizontal displacement (velocity): d is a direction angle
-        this.dX = 5 * Math.cos(d);
-        // (constant) vertical displacement (velocity): d is a direction angle
-        this.dY = 5 * Math.sin(d);
+        this.dX = dX
+            // (constant) vertical displacement (velocity): d is a direction angle
+        this.dY = dY;
+        this.d = d
         this.color = color; // color
         this.R = R
         this.v = v
@@ -268,9 +273,12 @@ function ArrowReleased(e) {
 
 
 }
+let dX = 10 * Math.cos(d)
+let dY = 10 * Math.sin(d)
 let b = new Array(); // setup as many balls as wanted
-let ball = new Ball(600, 100, R, color, v, d)
+let ball = new Ball(600, 100, R, color, v, d, dX, dY)
 b.push(ball)
+
 
 function render() {
     //Draw Background
@@ -278,113 +286,138 @@ function render() {
         ctx.drawImage(image.level.one.layer[i], 0, 0, canvas.width, canvas.height)
     }
 
+    if (lives > 0) {
 
-    //Draw Player
-    players.forEach(player => {
-        player.draw()
-    })
 
-    //draw ball
-
-    // b.forEach(function(ball) {
-    //     ball.draw();
-    //     ball.updateBall();
-    // })
+        //Draw Player
+        players.forEach(player => {
+            player.draw()
+        })
 
 
 
 
-    if (currFrame <= 60) {
-        currFrame++
-    } else {
-        currFrame = 0
-    }
 
-    if (rightKey && (players[0].x + 125 < canvas.width)) {
-        players[0].currAnimation = "walkRight"
-        players[0].x += players[0].xSpeed
+        if (currFrame <= 60) {
+            currFrame++
+        } else {
+            currFrame = 0
+        }
 
-    }
-    if (leftKey && (players[0].x - 125 > -145)) {
-        players[0].currAnimation = "walkLeft"
-        players[0].x += players[0].xSpeed
-    }
-    if (upKey && harpoon.y > -1) {
+        if (rightKey && (players[0].x + 125 < canvas.width)) {
+            players[0].currAnimation = "walkRight"
+            players[0].x += players[0].xSpeed
 
-        harpoon.draw(harpoon.x + 100, harpoon.y)
-            //harpoon.update(players[0].x, players[0].y)
-        harpoon.y -= 10
+        }
+        if (leftKey && (players[0].x - 125 > -145)) {
+            players[0].currAnimation = "walkLeft"
+            players[0].x += players[0].xSpeed
+        }
+        if (upKey && harpoon.y > -1) {
 
-
-    }
-
-    if (harpoon.y == 0) {
-        upKey = false
-        harpoon.x = players[0].x
-        harpoon.y = players[0].y
-    }
+            harpoon.draw(harpoon.x + 100, harpoon.y)
+                //harpoon.update(players[0].x, players[0].y)
+            harpoon.y -= 10
 
 
-    let colidiu = false
-    for (let i = b.length - 1; i >= 0; i--) {
-        let ball = b[i]
+        }
 
-        if (harpoon.x + 50 < ball.squareX
-            //totally to the left: no collision
-            ||
-            harpoon.x > (ball.squareX + ball.squareH)
-            //totally to the right: no collision
-            ||
-            harpoon.y + 50 < ball.squareY
-            //totally above: no collision
-            ||
-            harpoon.y > (ball.squareY + ball.squareH)) {
-            //totally below: no collision
-
-        } else if (harpoon.active && upKey) {
-            colidiu = true
-            harpoon.active = false
+        if (harpoon.y == 0) {
             upKey = false
-            harpoon.x = -1000
-            harpoon.y = -1000
+            harpoon.x = players[0].x
+            harpoon.y = players[0].y
         }
 
 
+        let colidiu = false
+        let colidiuPlayer = false
+        for (let i = b.length - 1; i >= 0; i--) {
+            let ball = b[i]
 
-        if (colidiu) {
-
-            colidiu = false
-            if (ball.R > 12.5) {
-                const pos = {
-                    x: ball.x,
-                    y: ball.y
-                }
-                const radius = ball.R / 2
-                b.splice(i, 1)
-                b.push(new Ball(pos.x + radius / 2, pos.y, radius, color, 4, d))
-                b.push(new Ball(pos.x - radius / 2, pos.y, radius, color, 4, d))
-
-            } else {
-                b.splice(i, 1)
+            if (players[0].x < ball.squareX
+                //totally to the left: no collision
+                ||
+                players[0].x > (ball.squareX + ball.squareH)
+                //totally to the right: no collision
+                ||
+                players[0].y < ball.squareY
+                //totally above: no collision
+                ||
+                players[0].y > (ball.squareY + ball.squareH)) {} else {
+                colidiuPlayer = true
+                lives--
+                console.log("entrei");
+            }
+            /* if (colidiuPlayer) {
+                players[0].y += 50
+                upKey = false
+            }
+            if (players[0].y > canvas.height + 100) {
+                players[0].x = canvas.width / 2
+                players[0].y = 200
+                colidiuPlayer = false
+                players.push(new Player(600, 400))
 
             }
-            console.log(b)
+ */
+
+            if (harpoon.x + 50 < ball.squareX
+                //totally to the left: no collision
+                ||
+                harpoon.x > (ball.squareX + ball.squareH)
+                //totally to the right: no collision
+                ||
+                harpoon.y + 50 < ball.squareY
+                //totally above: no collision
+                ||
+                harpoon.y > (ball.squareY + ball.squareH)) {
+                //totally below: no collision
+
+            } else if (harpoon.active && upKey) {
+                colidiu = true
+                harpoon.active = false
+                upKey = false
+                harpoon.x = -1000
+                harpoon.y = -1000
+            } else {}
+            if (colidiu) {
+
+                colidiu = false
+                if (ball.R > 12.5) {
+                    const pos = {
+                        x: ball.x,
+                        y: ball.y
+                    }
+                    const radius = ball.R / 2
+                    b.splice(i, 1)
+                    b.push(new Ball(pos.x + radius / 2, pos.y, radius, color, 4, d, dX, dY))
+                    b.push(new Ball(pos.x - radius / 2, pos.y, radius, color, 4, d, -dX, -dY))
+
+                } else {
+                    b.splice(i, 1)
+
+                }
+            }
+
+            ball.draw();
+            ball.updateBall();
+
+
+        }
+        let spaceCont = 20
+        for (let i = 0; i < lives; i++) {
+
+            ctx.drawImage(image.life.one, 1230 - spaceCont, 20, 50, 50)
+            spaceCont += 60
+
+
+
         }
 
-
-        ball.draw();
-        ball.updateBall();
-
-
-
+        window.requestAnimationFrame(render)
 
 
     }
-
-
-    window.requestAnimationFrame(render)
-
-
+    window.addEventListener('keydown', ArrowPressed)
+    window.addEventListener('keyup', ArrowReleased)
 }
-window.addEventListener('keydown', ArrowPressed)
-window.addEventListener('keyup', ArrowReleased)
