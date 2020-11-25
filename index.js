@@ -1,5 +1,5 @@
 let players = []
-let upKey = leftKey = rightKey = false
+let upKey = leftKey = rightKey = enterKey = false
 let currFrame = 0
 let gravity = 0.5
 let lives = 3
@@ -26,6 +26,9 @@ let image = {
     },
     player: {
         one: new Image(),
+    },
+    harpoon: {
+        sprite: new Image()
     },
     level: {
         one: {
@@ -78,8 +81,9 @@ image.level.two.layer.seven.src = "./img/background/2/road.png"
 //Player 1 Image
 image.player.one.src = "./img/players/imagem1.png"
 
-
-//Life Image
+//harpoon Image
+image.harpoon.sprite.src = "./img/harpoon.png"
+    //Life Image
 image.life.one.src = "./img/vida.png"
 
 
@@ -260,16 +264,18 @@ class Player {
 }
 
 class Harpoon {
-    constructor(x, y, w, h) {
+    constructor(img, x, y, w, h) {
         this.x = x
         this.y = y
         this.w = w
         this.h = h
         this.active = true
+        this.img = img
     }
 
     draw() {
-        ctx.fillRect(this.x, this.y, this.w, this.h)
+        ctx.drawImage(this.img, this.x, this.y, this.w, this.h)
+            //ctx.fillRect(this.x, this.y, this.w, this.h)
     }
 
     update(X, Y) {
@@ -279,7 +285,8 @@ class Harpoon {
         }
     }
 }
-let harpoon = new Harpoon(-10000, -10000, 50, 50)
+let harpoon = new Harpoon(image.harpoon.sprite, -10000, -10000, 50, 450)
+
 
 function ArrowPressed(e) {
 
@@ -296,10 +303,13 @@ function ArrowPressed(e) {
     //up arrow pressed
     if (e.keyCode == 38 && upKey == false) {
         upKey = true
-        harpoon.x = players[0].x
-        harpoon.y = players[0].y
+        harpoon.x = players[0].x + 50
+        harpoon.y = players[0].y - 300
         harpoon.active = true
         start = true
+    }
+    if (e.keyCode == 13) {
+        enterKey = true
     }
 
     e.preventDefault()
@@ -333,8 +343,7 @@ b.push(ball)
 function render() {
 
     if (levelGame == 1) {
-        console.log(levelGame)
-            //Draw First Background
+        //Draw First Background
         for (let i in image.level.one.layer) {
             ctx.drawImage(image.level.one.layer[i], 0, 0, canvas.width, canvas.height)
         }
@@ -366,7 +375,7 @@ function render() {
             }
             if (upKey && harpoon.y > -1) {
                 harpoon.draw(harpoon.x + 100, harpoon.y)
-                harpoon.y -= 10
+                harpoon.y -= 5
             }
 
             if (harpoon.y == 0) {
@@ -385,7 +394,7 @@ function render() {
 
                 if (players[0].currAnimation == "idleRight" || players[0].currAnimation == "idleLeft") {
                     if (ball.R <= 25) {
-                        if (getDistanceBetweenPoints(ball.x, ball.y, players[0].x, players[0].y) <= ball.R + 30) {
+                        if (getDistanceBetweenPoints(ball.x, ball.y, players[0].x, players[0].y) <= ball.R + 50) {
                             ball.dX = -ball.dX
                             ball.dY = -ball.dY
                             players[0].currAnimation = "hurtRight"
@@ -405,7 +414,7 @@ function render() {
                 }
                 if (players[0].currAnimation == "walkRight" || players[0].currAnimation == "walkLeft") {
                     if (ball.R <= 25) {
-                        if (getDistanceBetweenPoints(ball.x, ball.y, players[0].x, players[0].y) <= ball.R + 30) {
+                        if (getDistanceBetweenPoints(ball.x, ball.y, players[0].x, players[0].y) <= ball.R + 50) {
                             ball.dX = -ball.dX
                             ball.dY = -ball.dY
                             players[0].currAnimation = "hurtRight"
@@ -480,8 +489,33 @@ function render() {
             }
 
         } else if (lives === 0) {
-            alert("game over")
-            players[0].currAnimation = "dieRight"
+
+
+
+            for (let i in image.level.one.layer) {
+                ctx.drawImage(image.level.one.layer[i], 0, 0, canvas.width, canvas.height)
+            }
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, canvas.height - 50, canvas.width, canvas.height - 450);
+            ctx.fillStyle = 'white'
+            ctx.font = 'bold 65px Arial';
+            let text = "GAME OVER";
+            ctx.fillText(text, canvas.width / 2, canvas.height / 2 + 50);
+            ctx.fillStyle = 'white'
+            let info = "Press Enter to Menu"
+            ctx.font = "bold 20px Arial"
+            ctx.textAlign = "center";
+
+
+            ctx.fillText(info, canvas.width / 2, canvas.height / 2);
+
+            setTimeout(function(e) {
+                if (enterKey)
+                    window.location.href = './homePang.html';
+            }, 3000);
+
+
+
 
         } else if (lives > 0 && b.length == 0) {
 
@@ -630,8 +664,33 @@ function render() {
                 spaceCont += 60
             }
 
-        } else if (lives == 0) {
-            ctx.clearRect(0, 0, canvas.width, canvas.Height)
+        } else {
+            console.log("entrei");
+
+
+            for (let i in image.level.one.layer) {
+                ctx.drawImage(image.level.one.layer[i], 0, 0, canvas.width, canvas.height)
+            }
+            ctx.fillText(text, 300, 300);
+            ctx.fillStyle = 'black'
+            let info = "Press Enter to Menu"
+            ctx.font = "bold 20px Arial"
+            ctx.textAlign = "center";
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, canvas.height - 50, canvas.width, canvas.height - 450);
+            ctx.fillStyle = 'white'
+            ctx.font = 'bold 65px Arial';
+            let text = "GAME OVER";
+
+
+
+            ctx.fillText(info, 300, 300);
+
+            setTimeout(function(e) {
+                if (enterKey)
+                    window.location.href = './homePanghtml';
+            }, 3000);
+
 
 
         }
